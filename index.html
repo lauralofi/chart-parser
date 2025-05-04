@@ -21,10 +21,13 @@
       font-family: monospace;
       padding: 1rem;
       margin-bottom: 1rem;
+      display: block;
     }
     button {
+      display: block;
+      margin-bottom: 2rem;
       padding: 0.5rem 1rem;
-      background-color: #ffb347;
+      background-color: #c6c2ff;
       border: none;
       font-weight: bold;
       cursor: pointer;
@@ -49,7 +52,7 @@
   </style>
 </head>
 <body>
-  <h1>✨ Prep your chart data for Notion</h1>
+  <h1>Prep your chart data for Notion</h1>
   <p><strong>Instructions:</strong><br>
     1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
     2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
@@ -91,102 +94,97 @@
     </table>
   </div>
 
-<script>
-  function parseChart() {
-    const input = document.getElementById('chartInput').value;
-    const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+  <script>
+    function parseChart() {
+      const input = document.getElementById('chartInput').value;
+      const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
 
-    clearTables();
+      clearTables();
 
-    lines.forEach(line => {
-      if (isPlanetOrObjectLine(line)) {
-        parsePlanetOrObject(line);
-      } else if (isHouseLine(line)) {
-        parseHouse(line);
-      } else if (isAspectLine(line)) {
-        parseAspect(line);
+      lines.forEach(line => {
+        if (isPlanetOrObjectLine(line)) {
+          parsePlanetOrObject(line);
+        } else if (isHouseLine(line)) {
+          parseHouse(line);
+        } else if (isAspectLine(line)) {
+          parseAspect(line);
+        }
+      });
+
+      showSections();
+    }
+
+    function clearTables() {
+      ['planetTable', 'objectTable', 'houseTable', 'aspectTable'].forEach(id =>
+        document.getElementById(id).querySelector('tbody').innerHTML = ''
+      );
+    }
+
+    function showSections() {
+      ['planetSection', 'objectSection', 'houseSection', 'aspectSection'].forEach(id =>
+        document.getElementById(id).style.display = 'block'
+      );
+    }
+
+    const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
+
+    function isPlanetOrObjectLine(line) {
+      return /^\w+( \w+)? in \w+ \d+°\d+′(, Retrograde)?( in \d+(st|nd|rd|th) House)?/.test(line);
+    }
+
+    function parsePlanetOrObject(line) {
+      const match = line.match(/^(\w+ ?\w*) in (\w+) (\d+°\d+′)(, Retrograde)?( in (\d+)(st|nd|rd|th) House)?/);
+      if (!match) return;
+      const name = match[1];
+      const sign = match[2];
+      const degree = match[3];
+      const motion = match[4] ? 'retro' : 'direct';
+      const house = match[6] || '';
+      const row = [name, sign, degree, house, motion];
+      if (planets.includes(name)) {
+        appendRow('planetTable', row);
+      } else if (objects.includes(name)) {
+        appendRow('objectTable', row);
       }
-    });
+    }
 
-    showSections();
-  }
+    function isHouseLine(line) {
+      return /^\d+(st|nd|rd|th) House in/.test(line);
+    }
 
-  function clearTables() {
-    ['planetTable', 'objectTable', 'houseTable', 'aspectTable'].forEach(id =>
-      document.getElementById(id).querySelector('tbody').innerHTML = ''
-    );
-  }
+    function parseHouse(line) {
+      const match = line.match(/^(\d+)(st|nd|rd|th) House in (\w+) (\d+°\d+)/);
+      if (match) appendRow('houseTable', [match[1], match[3], match[4]]);
+    }
 
-  function showSections() {
-    ['planetSection', 'objectSection', 'houseSection', 'aspectSection'].forEach(id =>
-      document.getElementById(id).style.display = 'block'
-    );
-  }
+    function isAspectLine(line) {
+      return /^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/.test(line);
+    }
 
-  const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-  const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
+    function parseAspect(line) {
+      const match = line.match(/^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
+      if (!match) return;
+      const fullAspect = match[1];
+      const orb = match[2];
+      const type = match[3];
+      const aspectParts = fullAspect.split(' ');
+      const planet1 = aspectParts[0];
+      const aspectType = aspectParts[1];
+      const planet2 = aspectParts.slice(2).join(' ');
+      appendRow('aspectTable', [fullAspect, planet1, aspectType, planet2, `${orb}, ${type}`]);
+    }
 
-  function isPlanetOrObjectLine(line) {
-    return / in .* \d+°\d+/.test(line);
-  }
-
-  function parsePlanetOrObject(line) {
-    const [namePart, rest] = line.split(' in ');
-    const degreeMatch = rest.match(/(\d+°\d+′)/);
-    const signMatch = rest.match(/^(\w+)/);
-    const houseMatch = rest.match(/(\d+)(?:st|nd|rd|th) House/);
-    const motion = /Retrograde/.test(line) ? 'retro' : 'direct';
-
-    const name = namePart.trim();
-    const degree = degreeMatch?.[1] || '';
-    const sign = signMatch?.[1] || '';
-    const house = houseMatch?.[1] || '';
-
-    const rowData = [name, sign, degree, house, motion];
-    const tableId = planets.includes(name) ? 'planetTable' : objects.includes(name) ? 'objectTable' : null;
-
-    if (tableId) appendRow(tableId, rowData);
-  }
-
-  function isHouseLine(line) {
-    return /^\d+(st|nd|rd|th) House in/.test(line);
-  }
-
-  function parseHouse(line) {
-    const match = line.match(/^(\d+)(st|nd|rd|th) House in (\w+) (\d+°\d+)/);
-    if (match) appendRow('houseTable', [match[1], match[3], match[4]]);
-  }
-
-  function isAspectLine(line) {
-    return /\(orb: \d+°\d+′, (Applying|Separating)\)/.test(line);
-  }
-
-  function parseAspect(line) {
-    const match = line.match(/^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
-    if (!match) return;
-
-    const fullAspect = match[1];
-    const orb = match[2];
-    const type = match[3];
-    const aspectParts = fullAspect.split(' ');
-    const planet1 = aspectParts[0];
-    const aspectType = aspectParts[1];
-    const planet2 = aspectParts.slice(2).join(' ');
-
-    appendRow('aspectTable', [fullAspect, planet1, aspectType, planet2, `${orb}, ${type}`]);
-  }
-
-  function appendRow(tableId, values) {
-    const tbody = document.getElementById(tableId).querySelector('tbody');
-    const row = document.createElement('tr');
-    values.forEach(val => {
-      const td = document.createElement('td');
-      td.textContent = val;
-      row.appendChild(td);
-    });
-    tbody.appendChild(row);
-  }
-</script>
-
+    function appendRow(tableId, values) {
+      const tbody = document.getElementById(tableId).querySelector('tbody');
+      const row = document.createElement('tr');
+      values.forEach(val => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+    }
+  </script>
 </body>
 </html>
