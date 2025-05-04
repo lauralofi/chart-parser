@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✨ Astro-Seek Chart Parser</title>
+  <title>Import Birth Chart Data to Notion</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
-      background-color: #f7f5f2;
+      background-color: #ffffff;
       padding: 2rem;
-      color: #333;
+      color: #000000;
     }
     h1 {
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
     }
     textarea {
-      width: 100%;
+      width: 75%;
       height: 180px;
       font-family: monospace;
       padding: 1rem;
@@ -49,14 +49,14 @@
   </style>
 </head>
 <body>
-  <h1>✨ Paste Your Astro-Seek Chart Export</h1>
+  <h1>✨ Prep your chart data for Notion</h1>
   <p><strong>Instructions:</strong><br>
     1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
-    2. Scroll to the <strong>"AI-ChatGPT Astrology Data Export"</strong> section<br>
-    3. Copy all the text from that box and paste it below<br>
+    2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
+    3. Copy the text under Planet positions and paste it below. Repeat with the House positions and Planet aspects sections.<br>
     4. Click <strong>Parse My Birth Chart</strong> to see results!</p>
 
-  <textarea id="chartInput" placeholder="Paste your Astro-Seek export here..."></textarea>
+  <textarea id="chartInput" placeholder="Paste your chart data here..."></textarea>
   <button onclick="parseChart()">Parse My Birth Chart</button>
 
   <div id="planetSection" class="section">
@@ -86,73 +86,107 @@
   <div id="aspectSection" class="section">
     <h2>✨ Aspects</h2>
     <table id="aspectTable">
-      <thead><tr><th>Aspect</th><th>Orb</th><th>Type</th></tr></thead>
+      <thead><tr><th>Aspect</th><th>Planet 1</th><th>Type</th><th>Planet 2</th><th>Degree</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <script>
-    function parseChart() {
-      const input = document.getElementById('chartInput').value;
-      const lines = input.split('\n');
+<script>
+  function parseChart() {
+    const input = document.getElementById('chartInput').value;
+    const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
 
-      const planetTable = document.getElementById('planetTable').querySelector('tbody');
-      const objectTable = document.getElementById('objectTable').querySelector('tbody');
-      const houseTable = document.getElementById('houseTable').querySelector('tbody');
-      const aspectTable = document.getElementById('aspectTable').querySelector('tbody');
+    clearTables();
 
-      planetTable.innerHTML = '';
-      objectTable.innerHTML = '';
-      houseTable.innerHTML = '';
-      aspectTable.innerHTML = '';
+    lines.forEach(line => {
+      if (isPlanetOrObjectLine(line)) {
+        parsePlanetOrObject(line);
+      } else if (isHouseLine(line)) {
+        parseHouse(line);
+      } else if (isAspectLine(line)) {
+        parseAspect(line);
+      }
+    });
 
-      const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-      const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
+    showSections();
+  }
 
-      lines.forEach(line => {
-        // PLANETS & OBJECTS
-        if (line.match(/ in .* \d+°\d+/)) {
-          let [namePart, rest] = line.split(' in ');
-          const degreeMatch = rest.match(/(\d+°\d+′)/);
-          const signMatch = rest.match(/^(\w+)/);
-          const houseMatch = rest.match(/(\d+)(?:st|nd|rd|th) House/);
-          const motion = /Retrograde/.test(line) ? 'retro' : 'direct';
+  function clearTables() {
+    ['planetTable', 'objectTable', 'houseTable', 'aspectTable'].forEach(id =>
+      document.getElementById(id).querySelector('tbody').innerHTML = ''
+    );
+  }
 
-          const degree = degreeMatch ? degreeMatch[1] : '';
-          const sign = signMatch ? signMatch[1] : '';
-          const house = houseMatch ? houseMatch[1] : '';
-          const name = namePart.trim();
+  function showSections() {
+    ['planetSection', 'objectSection', 'houseSection', 'aspectSection'].forEach(id =>
+      document.getElementById(id).style.display = 'block'
+    );
+  }
 
-          if (planets.includes(name)) {
-            planetTable.innerHTML += `<tr><td>${name}</td><td>${sign}</td><td>${degree}</td><td>${house}</td><td>${motion}</td></tr>`;
-          } else if (objects.includes(name)) {
-            objectTable.innerHTML += `<tr><td>${name}</td><td>${sign}</td><td>${degree}</td><td>${house}</td><td>${motion}</td></tr>`;
-          }
-        }
+  const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+  const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
 
-        // HOUSES
-        if (line.match(/^\d+(st|nd|rd|th) House in/)) {
-          const match = line.match(/^(\d+)(st|nd|rd|th) House in (\w+) (\d+°\d+)/);
-          if (match) {
-            houseTable.innerHTML += `<tr><td>${match[1]}</td><td>${match[3]}</td><td>${match[4]}</td></tr>`;
-          }
-        }
+  function isPlanetOrObjectLine(line) {
+    return / in .* \d+°\d+/.test(line);
+  }
 
-        // ASPECTS
-        if (line.match(/\(orb: \d+°\d+′, (Applying|Separating)\)/)) {
-          const aspectMatch = line.match(/^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
-          if (aspectMatch) {
-            const [_, aspect, orb, type] = aspectMatch;
-            aspectTable.innerHTML += `<tr><td>${aspect}</td><td>${orb}</td><td>${type.toLowerCase()}</td></tr>`;
-          }
-        }
-      });
+  function parsePlanetOrObject(line) {
+    const [namePart, rest] = line.split(' in ');
+    const degreeMatch = rest.match(/(\d+°\d+′)/);
+    const signMatch = rest.match(/^(\w+)/);
+    const houseMatch = rest.match(/(\d+)(?:st|nd|rd|th) House/);
+    const motion = /Retrograde/.test(line) ? 'retro' : 'direct';
 
-      document.getElementById('planetSection').style.display = 'block';
-      document.getElementById('objectSection').style.display = 'block';
-      document.getElementById('houseSection').style.display = 'block';
-      document.getElementById('aspectSection').style.display = 'block';
-    }
-  </script>
+    const name = namePart.trim();
+    const degree = degreeMatch?.[1] || '';
+    const sign = signMatch?.[1] || '';
+    const house = houseMatch?.[1] || '';
+
+    const rowData = [name, sign, degree, house, motion];
+    const tableId = planets.includes(name) ? 'planetTable' : objects.includes(name) ? 'objectTable' : null;
+
+    if (tableId) appendRow(tableId, rowData);
+  }
+
+  function isHouseLine(line) {
+    return /^\d+(st|nd|rd|th) House in/.test(line);
+  }
+
+  function parseHouse(line) {
+    const match = line.match(/^(\d+)(st|nd|rd|th) House in (\w+) (\d+°\d+)/);
+    if (match) appendRow('houseTable', [match[1], match[3], match[4]]);
+  }
+
+  function isAspectLine(line) {
+    return /\(orb: \d+°\d+′, (Applying|Separating)\)/.test(line);
+  }
+
+  function parseAspect(line) {
+    const match = line.match(/^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
+    if (!match) return;
+
+    const fullAspect = match[1];
+    const orb = match[2];
+    const type = match[3];
+    const aspectParts = fullAspect.split(' ');
+    const planet1 = aspectParts[0];
+    const aspectType = aspectParts[1];
+    const planet2 = aspectParts.slice(2).join(' ');
+
+    appendRow('aspectTable', [fullAspect, planet1, aspectType, planet2, `${orb}, ${type}`]);
+  }
+
+  function appendRow(tableId, values) {
+    const tbody = document.getElementById(tableId).querySelector('tbody');
+    const row = document.createElement('tr');
+    values.forEach(val => {
+      const td = document.createElement('td');
+      td.textContent = val;
+      row.appendChild(td);
+    });
+    tbody.appendChild(row);
+  }
+</script>
+
 </body>
 </html>
