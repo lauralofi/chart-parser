@@ -1,4 +1,4 @@
-# Import Astro-Seek Chart to a Notion Database
+## Import Astro-Seek Chart to a Notion Database
 This tool helps users of the **Notion Astrology Template** copy their birth chart details directly from [Astro-Seek's free calculator](https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/) into Notion database format.
 
 ### ✨ What It Does
