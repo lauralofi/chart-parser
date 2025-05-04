@@ -11,10 +11,6 @@
       padding: 2rem;
       color: #000000;
     }
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-    }
     textarea {
       width: 75%;
       height: 180px;
@@ -55,7 +51,7 @@
   <p><strong>Instructions:</strong><br>
     1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
     2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
-    3. Copy the text under Planet positions and paste it below. Repeat with the House positions and Planet aspects sections.<br>
+    3. Copy the full text and paste it below.<br>
     4. Click <strong>Parse My Birth Chart</strong> to see results!</p>
 
   <textarea id="chartInput" placeholder="Paste your chart data here..."></textarea>
@@ -100,15 +96,15 @@
 
       clearTables();
 
-      lines.forEach(line => {
-        if (isPlanetOrObjectLine(line)) {
-          parsePlanetOrObject(line);
-        } else if (isHouseLine(line)) {
-          parseHouse(line);
-        } else if (isAspectLine(line)) {
-          parseAspect(line);
-        }
-      });
+      let section = null;
+      for (const line of lines) {
+        if (line.includes('Planet positions')) section = 'planet';
+        else if (line.includes('House positions')) section = 'house';
+        else if (line.includes('Planet aspects')) section = 'aspect';
+        else if (section === 'planet') parsePlanetOrObject(line);
+        else if (section === 'house') parseHouse(line);
+        else if (section === 'aspect') parseAspect(line);
+      }
 
       showSections();
     }
@@ -128,54 +124,29 @@
     const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
     const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
 
-    function isPlanetOrObjectLine(line) {
-      return /(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in \w+ \d+°\d+′/.test(line);
-    }
-
     function parsePlanetOrObject(line) {
-      const match = line.match(/^(\w+ ?\w*) in (\w+) (\d+°\d+′)(, Retrograde)?( in (\d+)(st|nd|rd|th) House)?/);
-      console.log('Planet/Object line:', line);
-      console.log('Regex match:', match);
+      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(, Retrograde)?(?: in (\d+)(?:st|nd|rd|th) House)?/;
+      const match = line.match(regex);
       if (!match) return;
-      const name = match[1];
-      const sign = match[2];
-      const degree = match[3];
-      const motion = match[4] ? 'retro' : 'direct';
-      const house = match[6] || '';
-      const row = [name, sign, degree, house, motion];
-      if (planets.includes(name)) {
-        appendRow('planetTable', row);
-      } else if (objects.includes(name)) {
-        appendRow('objectTable', row);
-      }
-    }
-
-    function isHouseLine(line) {
-      return /^\d+(st|nd|rd|th) House in/.test(line);
+      const [ , name, sign, degree, retro, house ] = match;
+      const motion = retro ? 'retro' : 'direct';
+      const row = [name, sign, degree, house || '', motion];
+      if (planets.includes(name)) appendRow('planetTable', row);
+      else appendRow('objectTable', row);
     }
 
     function parseHouse(line) {
-      const match = line.match(/^(\d+)(st|nd|rd|th) House in (\w+) (\d+°\d+)/);
-      if (match) appendRow('houseTable', [match[1], match[3], match[4]]);
-    }
-
-    function isAspectLine(line) {
-      return /^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/.test(line);
+      const match = line.match(/^(\d+)(?:st|nd|rd|th) House in (\w+) (\d+°\d+)/);
+      if (match) appendRow('houseTable', [match[1], match[2], match[3]]);
     }
 
     function parseAspect(line) {
-      console.log('Aspect line:', line);
-      const match = line.match(/^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
-      console.log('Aspect match:', match);
+      const match = line.match(/^(.*?) \((.*?) orb: (\d+°\d+′), (Applying|Separating)\)/);
       if (!match) return;
-      const fullAspect = match[1];
-      const orb = match[2];
-      const type = match[3];
-      const aspectParts = fullAspect.split(' ');
-      const planet1 = aspectParts[0];
-      const aspectType = aspectParts[1];
-      const planet2 = aspectParts.slice(2).join(' ');
-      appendRow('aspectTable', [fullAspect, planet1, aspectType, planet2, `${orb}, ${type}`]);
+      const [ , aspect, , orb, direction ] = match;
+      const [planet1, type, ...rest] = aspect.split(' ');
+      const planet2 = rest.join(' ');
+      appendRow('aspectTable', [aspect, planet1, type, planet2, `${orb}, ${direction}`]);
     }
 
     function appendRow(tableId, values) {
