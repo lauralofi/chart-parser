@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Astro-Seek Chart Parser</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background-color: #f6f5f4;
+      color: #2f2f2f;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: monospace;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      background: #fff;
+    }
+    button {
+      background-color: #eaeaea;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background-color: #ddd;
+    }
+    table {
+      width: 100%;
+      margin-top: 1rem;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>✨ Paste Your Astro-Seek Chart Export</h1>
+  <textarea id="astroInput" placeholder="Paste the 'AI-ChatGPT Astrology Data Export' section here..."></textarea>
+  <button id="parseButton">Parse My Birth Chart</button>
+  <table id="outputTable"></table>
+
+  <script>
+    const inputTextArea = document.getElementById("astroInput");
+    const outputTable = document.getElementById("outputTable");
+    const parseButton = document.getElementById("parseButton");
+
+    parseButton.addEventListener("click", () => {
+      const raw = inputTextArea.value;
+      const lines = raw.split("\n").filter(l => l.includes("in") && l.includes("House"));
+
+      const rows = lines.map(line => {
+        const regex = /^(\w+) in (\w+) ([0-9°′]+),? (Retrograde, )?in (\d+)(?:st|nd|rd|th)? House$/i;
+        const match = line.match(regex);
+        if (!match) return null;
+
+        const [_, planet, sign, degree, retroFlag, house] = match;
+        return {
+          Planet: planet,
+          Sign: sign,
+          Degree: degree,
+          House: house,
+          Motion: retroFlag ? "retro" : "direct"
+        };
+      }).filter(Boolean);
+
+      outputTable.innerHTML = "";
+
+      const headerRow = document.createElement("tr");
+      ["Planet", "Sign", "Degree", "House", "Motion"].forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        headerRow.appendChild(th);
+      });
+      outputTable.appendChild(headerRow);
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        Object.values(row).forEach(val => {
+          const td = document.createElement("td");
+          td.textContent = val;
+          tr.appendChild(td);
+        });
+        outputTable.appendChild(tr);
+      });
+    });
+  </script>
+</body>
+</html>
