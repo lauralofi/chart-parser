@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>✨ Paste Your Astro-Seek Chart Export</title>
+  <title>✨ Import Birth Chart Data to Notion</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -37,69 +37,75 @@
 </head>
 <body>
   <h1>✨ Paste Your Astro-Seek Chart Export</h1>
-  <textarea id="input"></textarea>
+  <div class="instructions">
+    <h2>🪐 Instructions</h2>
+    <ol>
+      <li>Visit <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek’s Free Birth Chart Calculator</a></li>
+      <li>Scroll to the section called <strong>AI-ChatGPT - Astrology Data Export</strong></li>
+      <li>Copy <strong>all the text</strong> under Planet positions, House positions, and Planet aspects. Please do <strong>not</strong> include the headings for each section.</li>
+      <li>Paste it in the box below and click <strong>“Parse My Birth Chart”</strong></li>
+      <li>Copy the results into your Notion template</li>
+    </ol>
+    <p><em>This tool outputs four tables: Planetary Positions, Chart Objects, House Positions, and Aspects.</em></p>
+  </div>
+   <textarea id="input"></textarea>
   <br />
   <button onclick="parseChart()">Parse My Birth Chart</button>
 
-  <h2>🌞 Planetary Positions</h2>
-  <table id="planets">
-    <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <div class="section">
+    <h2>🌞 Planetary Positions</h2>
+    <table id="planet-table">
+      <tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr>
+    </table>
+  </div>
 
-  <h2>🪐 Chart Objects</h2>
-  <table id="objects">
-    <thead><tr><th>Object</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <div class="section">
+    <h2>🍂 Chart Objects</h2>
+    <table id="object-table">
+      <tr><th>Object</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr>
+    </table>
+  </div>
 
-  <h2>🏡 House Positions</h2>
-  <table id="houses">
-    <thead><tr><th>House</th><th>Sign</th><th>Degree</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <div class="section">
+    <h2>🏠 House Positions</h2>
+    <table id="house-table">
+      <tr><th>House</th><th>Sign</th><th>Degree</th></tr>
+    </table>
+  </div>
 
-  <h2>✨ Aspects</h2>
-  <table id="aspects">
-    <thead><tr><th>Aspect</th><th>Orb</th><th>Type</th></tr></thead>
-    <tbody></tbody>
-  </table>
+  <div class="section">
+    <h2>✨ Aspects</h2>
+    <table id="aspect-table">
+      <tr><th>Aspect</th><th>Orb</th><th>Type</th></tr>
+    </table>
+  </div>
 
   <script>
     function parseChart() {
-      const input = document.getElementById("input").value;
-      const lines = input.split("\n");
+      const text = document.getElementById("input").value;
+      if (!text.trim()) return;
+      const planetTable = document.getElementById("planet-table");
+      const objectTable = document.getElementById("object-table");
+      const houseTable = document.getElementById("house-table");
+      const aspectTable = document.getElementById("aspect-table");
 
-      const planetRegex = /^([A-Za-z() ]+) in ([A-Za-z]+) (\d+°\d+′), (Retrograde, )?in (\d+)(?:st|nd|rd|th) House/;
-      const houseRegex = /^(\d+)(?:st|nd|rd|th) House in ([A-Za-z]+) (\d+°\d+′)/;
-      const aspectRegex = /^(.+) \(.*?([\d°′]+), (Applying|Separating)\)/;
+      [planetTable, objectTable, houseTable, aspectTable].forEach(t => t.innerHTML = t.rows[0].outerHTML);
 
-      const planets = ["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Pluto","ASC","MC"];
-
-      const planetTable = document.querySelector("#planets tbody");
-      const objectTable = document.querySelector("#objects tbody");
-      const houseTable = document.querySelector("#houses tbody");
-      const aspectTable = document.querySelector("#aspects tbody");
-
-      planetTable.innerHTML = "";
-      objectTable.innerHTML = "";
-      houseTable.innerHTML = "";
-      aspectTable.innerHTML = "";
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
 
       lines.forEach(line => {
-        let m;
-
-        if ((m = planetRegex.exec(line))) {
-          const [_, name, sign, degree, retro, house] = m;
-          const isPlanet = planets.includes(name.trim());
-          const row = `<tr><td>${name.trim()}</td><td>${sign}</td><td>${degree}</td><td>${house}</td><td>${retro ? "retro" : "direct"}</td></tr>`;
-          (isPlanet ? planetTable : objectTable).innerHTML += row;
-        } else if ((m = houseRegex.exec(line))) {
-          const [_, number, sign, degree] = m;
-          houseTable.innerHTML += `<tr><td>${number}</td><td>${sign}</td><td>${degree}</td></tr>`;
-        } else if ((m = aspectRegex.exec(line))) {
-          const [_, aspect, orb, type] = m;
-          aspectTable.innerHTML += `<tr><td>${aspect}</td><td>${orb}</td><td>${type.toLowerCase()}</td></tr>`;
+        if (/^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto)/.test(line)) {
+          const [_, planet, sign, degree, house, motion] = line.match(/^(\w+) in (\w+) ([^,]+), in (\d+).*?(Retrograde)?$/) || [];
+          if (planet) planetTable.innerHTML += `<tr><td>${planet}</td><td>${sign}</td><td>${degree}</td><td>${house}</td><td>${motion ? 'retro' : 'direct'}</td></tr>`;
+        } else if (/^(North Node|South Node|Lilith|Chiron|Fortune|Vertex)/.test(line)) {
+          const [_, object, sign, degree, house, motion] = line.match(/^(.*?) in (\w+) ([^,]+), in (\d+).*?(Retrograde)?$/) || [];
+          if (object) objectTable.innerHTML += `<tr><td>${object}</td><td>${sign}</td><td>${degree}</td><td>${house}</td><td>${motion ? 'retro' : 'direct'}</td></tr>`;
+        } else if (/^\d+.. House in/.test(line)) {
+          const [_, house, sign, degree] = line.match(/^(\d+).+ in (\w+) (.+)$/) || [];
+          if (house) houseTable.innerHTML += `<tr><td>${house}</td><td>${sign}</td><td>${degree}</td></tr>`;
+        } else if (/\(orb:/.test(line)) {
+          const [_, aspect, orb, type] = line.match(/^(.+?) \(orb: ([^\)]+)\, (\w+)\)$/) || [];
+          if (aspect) aspectTable.innerHTML += `<tr><td>${aspect}</td><td>${orb}</td><td>${type}</td></tr>`;
         }
       });
     }
