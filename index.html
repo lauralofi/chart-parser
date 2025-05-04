@@ -52,6 +52,7 @@
   </style>
 </head>
 <body>
+  <h1>Prep your chart data for Notion</h1>
   <p><strong>Instructions:</strong><br>
     1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
     2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
@@ -129,11 +130,13 @@
     const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
 
     function isPlanetOrObjectLine(line) {
-      return /^\w+( \w+)? in \w+ \d+°\d+′(, Retrograde)?( in \d+(st|nd|rd|th) House)?/.test(line);
+      return /(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in \w+ \d+°\d+′/.test(line);
     }
 
     function parsePlanetOrObject(line) {
       const match = line.match(/^(\w+ ?\w*) in (\w+) (\d+°\d+′)(, Retrograde)?( in (\d+)(st|nd|rd|th) House)?/);
+      console.log('Planet/Object line:', line);
+      console.log('Regex match:', match);
       if (!match) return;
       const name = match[1];
       const sign = match[2];
@@ -162,7 +165,9 @@
     }
 
     function parseAspect(line) {
+      console.log('Aspect line:', line);
       const match = line.match(/^(.+?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
+      console.log('Aspect match:', match);
       if (!match) return;
       const fullAspect = match[1];
       const orb = match[2];
