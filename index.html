@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Astro-Seek Chart Parser</title>
+  <style>
+    body { font-family: sans-serif; background: #f8f7f4; color: #333; padding: 2rem; }
+    h2 { margin-top: 2rem; }
+    textarea { width: 100%; height: 200px; margin-bottom: 1rem; font-family: monospace; }
+    button { padding: 0.5rem 1rem; margin-bottom: 1rem; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 2rem; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #eee; }
+    .section { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h1>✨ Paste Your Astro-Seek Chart Export</h1>
+  <textarea id="input" placeholder="Paste your Astro-Seek export here..."></textarea>
+  <button onclick="parseChart()">Parse My Birth Chart</button>
+
+  <div class="section">
+    <h2>🌞 Planetary Positions</h2>
+    <table id="planetTable">
+      <thead>
+        <tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🪐 Chart Objects</h2>
+    <table id="objectTable">
+      <thead>
+        <tr><th>Object</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🏠 House Positions</h2>
+    <table id="houseTable">
+      <thead>
+        <tr><th>House</th><th>Sign</th><th>Degree</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>✨ Aspects</h2>
+    <table id="aspectTable">
+      <thead>
+        <tr><th>Aspect</th><th>Orb</th><th>Type</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+function parseChart() {
+  const input = document.getElementById("input").value.trim().split("\n");
+  const planetTable = document.getElementById("planetTable").querySelector("tbody");
+  const objectTable = document.getElementById("objectTable").querySelector("tbody");
+  const houseTable = document.getElementById("houseTable").querySelector("tbody");
+  const aspectTable = document.getElementById("aspectTable").querySelector("tbody");
+  planetTable.innerHTML = "";
+  objectTable.innerHTML = "";
+  houseTable.innerHTML = "";
+  aspectTable.innerHTML = "";
+
+  input.forEach(line => {
+    let houseMatch = line.match(/^(\d+)[a-z]{2} House in (\w+) (\d+°\d+′)/);
+    if (houseMatch) {
+      houseTable.innerHTML += `<tr><td>${houseMatch[1]}</td><td>${houseMatch[2]}</td><td>${houseMatch[3]}</td></tr>`;
+      return;
+    }
+
+    let aspectMatch = line.match(/^(.*?) \((Orb: [\d°′]+), (Applying|Separating)\)/);
+    if (aspectMatch) {
+      aspectTable.innerHTML += `<tr><td>${aspectMatch[1]}</td><td>${aspectMatch[2]}</td><td>${aspectMatch[3]}</td></tr>`;
+      return;
+    }
+
+    let fullMatch = line.match(/^(.*?) in (\w+) (\d+°\d+′)(, Retrograde)?(?:, in (\d+)[a-z]{2} House)?/);
+    if (fullMatch) {
+      let name = fullMatch[1].trim();
+      let target = (["Sun","Moon","Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune","Pluto"].includes(name.split(" ")[0]))
+                   ? planetTable : objectTable;
+      target.innerHTML += `<tr><td>${name}</td><td>${fullMatch[2]}</td><td>${fullMatch[3]}</td><td>${fullMatch[5] || ""}</td><td>${fullMatch[4] ? "Retrograde" : "Direct"}</td></tr>`;
+    }
+  });
+}
+</script>
+
+</body>
+</html>
