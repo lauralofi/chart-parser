@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Import Birth Chart Data to Notion</title>
+  <title>Format birth chart for copy/paste</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -51,8 +51,8 @@
   <p><strong>Instructions:</strong><br>
     1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
     2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
-    3. Copy the full text and paste it below.<br>
-    4. Click <strong>Parse My Birth Chart</strong> to see results!</p>
+    3. Copy the full text (Planet positions, House positions, planet aspects, other aspects)<br>
+    4. Paste the text below and click <strong>Parse My Birth Chart</strong> to see results!</p>
 
   <textarea id="chartInput" placeholder="Paste your chart data here..."></textarea>
   <button onclick="parseChart()">Parse My Birth Chart</button>
@@ -98,9 +98,10 @@
 
       let section = null;
       for (const line of lines) {
-        if (line.includes('Planet positions')) section = 'planet';
-        else if (line.includes('House positions')) section = 'house';
-        else if (line.includes('Planet aspects')) section = 'aspect';
+        const lowerLine = line.toLowerCase();
+        if (lowerLine.includes('planet positions')) section = 'planet';
+        else if (lowerLine.includes('house positions')) section = 'house';
+        else if (lowerLine.includes('planet aspects')) section = 'aspect';
         else if (section === 'planet') parsePlanetOrObject(line);
         else if (section === 'house') parseHouse(line);
         else if (section === 'aspect') parseAspect(line);
@@ -125,7 +126,7 @@
     const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
 
     function parsePlanetOrObject(line) {
-      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(, Retrograde)?(?: in (\d+)(?:st|nd|rd|th) House)?/;
+      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(, Retrograde)?(?:, in (\d+)\w+ House)?/;
       const match = line.match(regex);
       if (!match) return;
       const [ , name, sign, degree, retro, house ] = match;
@@ -141,12 +142,12 @@
     }
 
     function parseAspect(line) {
-      const match = line.match(/^(.*?) \((.*?) orb: (\d+°\d+′), (Applying|Separating)\)/);
+      const match = line.match(/^(.*?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
       if (!match) return;
-      const [ , aspect, , orb, direction ] = match;
-      const [planet1, type, ...rest] = aspect.split(' ');
+      const [ , fullAspect, orb, direction ] = match;
+      const [planet1, type, ...rest] = fullAspect.split(' ');
       const planet2 = rest.join(' ');
-      appendRow('aspectTable', [aspect, planet1, type, planet2, `${orb}, ${direction}`]);
+      appendRow('aspectTable', [fullAspect, planet1, type, planet2, `${orb}, ${direction}`]);
     }
 
     function appendRow(tableId, values) {
@@ -162,3 +163,4 @@
   </script>
 </body>
 </html>
+
