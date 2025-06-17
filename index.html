@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Format birth chart for copy/paste</title>
+  <title>Import Birth Chart Data to Notion</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -51,8 +51,8 @@
   <p><strong>Instructions:</strong><br>
     1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
     2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
-    3. Copy the full text (Planet positions, House positions, planet aspects, other aspects)<br>
-    4. Paste the text below and click <strong>Parse My Birth Chart</strong> to see results!</p>
+    3. Copy the full text and paste it below.<br>
+    4. Click <strong>Parse My Birth Chart</strong> to see results!</p>
 
   <textarea id="chartInput" placeholder="Paste your chart data here..."></textarea>
   <button onclick="parseChart()">Parse My Birth Chart</button>
@@ -122,45 +122,4 @@
       );
     }
 
-    const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-    const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
-
-    function parsePlanetOrObject(line) {
-      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(, Retrograde)?(?:, in (\d+)\w+ House)?/;
-      const match = line.match(regex);
-      if (!match) return;
-      const [ , name, sign, degree, retro, house ] = match;
-      const motion = retro ? 'retro' : 'direct';
-      const row = [name, sign, degree, house || '', motion];
-      if (planets.includes(name)) appendRow('planetTable', row);
-      else appendRow('objectTable', row);
-    }
-
-    function parseHouse(line) {
-      const match = line.match(/^(\d+)(?:st|nd|rd|th) House in (\w+) (\d+°\d+)/);
-      if (match) appendRow('houseTable', [match[1], match[2], match[3]]);
-    }
-
-    function parseAspect(line) {
-      const match = line.match(/^(.*?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
-      if (!match) return;
-      const [ , fullAspect, orb, direction ] = match;
-      const [planet1, type, ...rest] = fullAspect.split(' ');
-      const planet2 = rest.join(' ');
-      appendRow('aspectTable', [fullAspect, planet1, type, planet2, `${orb}, ${direction}`]);
-    }
-
-    function appendRow(tableId, values) {
-      const tbody = document.getElementById(tableId).querySelector('tbody');
-      const row = document.createElement('tr');
-      values.forEach(val => {
-        const td = document.createElement('td');
-        td.textContent = val;
-        row.appendChild(td);
-      });
-      tbody.appendChild(row);
-    }
-  </script>
-</body>
-</html>
-
+    const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uran
