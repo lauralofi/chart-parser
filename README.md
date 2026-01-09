@@ -9,9 +9,9 @@ A simple, browser-based tool that converts birth chart data from astro-seek.com 
 1. Go to Astro-Seek’s Birth Chart Calculator, enter your birth details, and generate your chart.
    https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/
 
-2. Scroll to the section labeled **“AI-ChatGPT – Astrology Data Export”**
+3. Scroll to the section labeled **“AI-ChatGPT – Astrology Data Export”**
 
-3. Copy and paste the full text block under each section (Planet positions, House positions, Planet aspects, Other aspects) into the text box. Be sure to include section headers (ex: Planet positions). Do not edit, shorten, or reformat the text blocks.
+4. Copy and paste the full text block under each section (Planet positions, House positions, Planet aspects, Other aspects) into the text box. Be sure to include section headers (ex: Planet positions). Do not edit, shorten, or reformat the text blocks.
 
 ---
 
