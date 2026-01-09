@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Import Birth Chart Data to Notion</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: #ffffff;
+      padding: 2rem;
+      color: #000000;
+    }
+    textarea {
+      width: 75%;
+      height: 180px;
+      font-family: monospace;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    button {
+      display: block;
+      margin-bottom: 2rem;
+      padding: 0.5rem 1rem;
+      background-color: #c6c2ff;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+      text-align: left;
+    }
+    th {
+      background-color: #f0eae2;
+    }
+    .section {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <p><strong>Instructions:</strong><br>
+    1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
+    2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
+    3. Copy the full text and paste it below.<br>
+    4. Click <strong>Parse My Birth Chart</strong> to see results!</p>
+
+  <textarea id="chartInput" placeholder="Paste your chart data here..."></textarea>
+  <button onclick="parseChart()">Parse My Birth Chart</button>
+
+  <div id="planetSection" class="section">
+    <h2>🌞 Planetary Positions</h2>
+    <table id="planetTable">
+      <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="objectSection" class="section">
+    <h2>🌙 Chart Objects</h2>
+    <table id="objectTable">
+      <thead><tr><th>Object</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="houseSection" class="section">
+    <h2>🏠 House Positions</h2>
+    <table id="houseTable">
+      <thead><tr><th>House</th><th>Sign</th><th>Degree</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="aspectSection" class="section">
+    <h2>✨ Aspects</h2>
+    <table id="aspectTable">
+      <thead><tr><th>Aspect</th><th>Planet 1</th><th>Type</th><th>Planet 2</th><th>Degree</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    function parseChart() {
+      const input = document.getElementById('chartInput').value;
+      const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+
+      clearTables();
+
+      let section = null;
+      for (const line of lines) {
+        const lowerLine = line.toLowerCase();
+        if (lowerLine.includes('planet positions')) section = 'planet';
+        else if (lowerLine.includes('house positions')) section = 'house';
+        else if (lowerLine.includes('planet aspects')) section = 'aspect';
+        else if (section === 'planet') parsePlanetOrObject(line);
+        else if (section === 'house') parseHouse(line);
+        else if (section === 'aspect') parseAspect(line);
+      }
+
+      showSections();
+    }
+
+    function clearTables() {
+      ['planetTable', 'objectTable', 'houseTable', 'aspectTable'].forEach(id =>
+        document.getElementById(id).querySelector('tbody').innerHTML = ''
+      );
+    }
+
+    function showSections() {
+      ['planetSection', 'objectSection', 'houseSection', 'aspectSection'].forEach(id =>
+        document.getElementById(id).style.display = 'block'
+      );
+    }
+
+    const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
+    const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
+
+    function parsePlanetOrObject(line) {
+      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(?:, (Retrograde))?, in (\d+)[a-z]{2} House/;
+      const match = line.match(regex);
+      if (!match) return;
+      const [ , name, sign, degree, retro, house ] = match;
+      const motion = retro === 'Retrograde' ? 'retro' : 'direct';
+      const row = [name, sign, degree, house, motion];
+      if (planets.includes(name)) appendRow('planetTable', row);
+      else appendRow('objectTable', row);
+    }
+
+    function parseHouse(line) {
+      const match = line.match(/^(\d+)(?:st|nd|rd|th) House in (\w+) (\d+°\d+)/);
+      if (match) appendRow('houseTable', [match[1], match[2], match[3]]);
+    }
+
+    function parseAspect(line) {
+      const match = line.match(/^(.*?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
+      if (!match) return;
+      const [ , fullAspect, orb, direction ] = match;
+      const [planet1, type, ...rest] = fullAspect.split(' ');
+      const planet2 = rest.join(' ');
+      appendRow('aspectTable', [fullAspect, planet1, type, planet2, `${orb}, ${direction}`]);
+    }
+
+    function appendRow(tableId, values) {
+      const tbody = document.getElementById(tableId).querySelector('tbody');
+      const row = document.createElement('tr');
+      values.forEach(val => {
+        const td = document.createElement('td');
+        td.textContent = val;
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
+    }
+  </script>
+</body>
+</html>
