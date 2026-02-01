@@ -176,6 +176,21 @@ const PLANET_ORDER = [
   "Fortune","Vertex","Midheaven","Ceres","Pallas","Juno","Vesta"
 ];
 
+const OPPOSITE_SIGNS = {
+  Aries: "Libra",
+  Taurus: "Scorpio",
+  Gemini: "Sagittarius",
+  Cancer: "Capricorn",
+  Leo: "Aquarius",
+  Virgo: "Pisces",
+  Libra: "Aries",
+  Scorpio: "Taurus",
+  Sagittarius: "Gemini",
+  Capricorn: "Cancer",
+  Aquarius: "Leo",
+  Pisces: "Virgo"
+};
+  
 function parseAll() {
   clearTables();
   parsePlanets();
@@ -240,6 +255,26 @@ function parsePlanets() {
       HOUSE_NAMES[houseNum]
     ];
   });
+
+  if (rows["North Node"]) {
+  const north = rows["North Node"];
+
+  const northSign = north[1];
+  const degree = north[3];
+  const northHouseLabel = north[4];
+
+  // Extract house number from "4 • House of Family"
+  const northHouseNum = parseInt(northHouseLabel.split(" •")[0], 10);
+  const southHouseNum = ((northHouseNum + 5) % 12) + 1;
+
+  rows["South Node"] = [
+    "South Node",
+    OPPOSITE_SIGNS[northSign],
+    north[2], // same motion (usually retro)
+    degree,
+    HOUSE_NAMES[southHouseNum]
+  ];
+}
 
   PLANET_ORDER.forEach(p => {
     if (rows[p]) appendRow("planetTable", rows[p]);
