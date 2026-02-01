@@ -79,7 +79,7 @@ th {
 <h4>Other aspects:</h4>
 <textarea id="otherAspectInput"></textarea>
 <br>
-<button onclick="parseAll()">Parse My Chart</button>
+<button type="button" onclick="parseAll()">Parse My Chart</button>
 
   
 <!-- PLANETARY POSITIONS -->
@@ -252,7 +252,7 @@ function parsePlanets() {
 
   lines.forEach(line => {
     const match = line.match(
-      /^(.*?) in (\w+) (\d+°\d+’)(?:, Retrograde)?, in (\d+)[a-z]{2} House/
+      /^(.*?) in (\w+) (\d+°\d+['’′]\d+)(?:, Retrograde)?, in (\d+)[a-z]{2} House/
     );
     if (!match) return;
 
