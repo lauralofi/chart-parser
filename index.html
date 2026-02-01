@@ -185,6 +185,29 @@ const OPPOSITE_SIGNS = {
   Aquarius: "Leo",
   Pisces: "Virgo"
 };
+
+function clearTables() {
+  ["planetTable", "houseTable", "aspectTable"].forEach(id => {
+    document.getElementById(id).innerHTML = "";
+  });
+}
+
+function showSections() {
+  ["planetSection", "houseSection", "aspectSection"].forEach(id => {
+    document.getElementById(id).style.display = "block";
+  });
+}
+
+function appendRow(tableId, values) {
+  const tr = document.createElement("tr");
+  values.forEach(value => {
+    const td = document.createElement("td");
+    td.textContent = value;
+    tr.appendChild(td);
+  });
+  document.getElementById(tableId).appendChild(tr);
+}
+
   
 function parseAll() {
   clearTables();
@@ -299,4 +322,19 @@ function parseAspects() {
     document.getElementById("otherAspectInput").value;
 
   combined.split("\n").forEach(line => {
-    cons
+    const match = line.match(
+      /^(.*?) (Conjunction|Opposition|Sextile|Square|Trine|Quincunx) (.*?) \(Orb: ([^,]+), (Applying|Separating)\)/
+    );
+    if (!match) return;
+
+    appendRow("aspectTable", [
+      `${match[1]} ${match[2]} ${match[3]}`,
+      match[1],
+      match[2],
+      match[3],
+      match[4],
+      match[5]
+    ]);
+  });
+}
+
