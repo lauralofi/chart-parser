@@ -49,34 +49,10 @@ th {
   margin-top: 2rem;
 }
 
-function copyTableToClipboard(tableId) {
-  const rows = document.querySelectorAll(`#${tableId} tr`);
-  const text = [...rows].map(row =>
-    [...row.children].map(cell => cell.textContent).join("\t")
-  ).join("\n");
-
-  navigator.clipboard.writeText(text);
-  alert("Copied! Ready to paste into Notion ✨");
+.section button {
+  margin-right: 0.5rem;
+  margin-bottom: 0.75rem;
 }
-
-function downloadCSV(tableId, filename) {
-  const rows = document.querySelectorAll(`#${tableId} tr`);
-  const csv = [...rows].map(row =>
-    [...row.children]
-      .map(cell => `"${cell.textContent.replace(/"/g, '""')}"`)
-      .join(",")
-  ).join("\n");
-
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 </style>
 </head>
 
@@ -103,27 +79,32 @@ into the matching box below.
 
 <button onclick="parseAll()">Parse My Chart</button>
 
+  
 <!-- PLANETARY POSITIONS -->
-<button onclick="copyTableToClipboard('planetTable')">Copy for Notion</button>
-<button onclick="downloadCSV('planetTable','planetary-positions.csv')">
-  Download CSV
-</button>
-
 <div id="planetSection" class="section">
-<h2>Planetary Positions</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Sign</th>
-<th>Motion</th>
-<th>Degree</th>
-<th>House</th>
-</tr>
-</thead>
-<tbody id="planetTable"></tbody>
-</table>
+  <h2>Planetary Positions</h2>
+
+  <button onclick="copyTableToClipboard('planetTable')">
+    Copy for Notion
+  </button>
+  <button onclick="downloadCSV('planetTable','planetary-positions.csv')">
+    Download CSV
+  </button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Sign</th>
+        <th>Motion</th>
+        <th>Degree</th>
+        <th>House</th>
+      </tr>
+    </thead>
+    <tbody id="planetTable"></tbody>
+  </table>
 </div>
+
 
 <!-- HOUSE POSITIONS -->
 <button onclick="copyTableToClipboard('houseTable')">Copy for Notion</button>
@@ -199,6 +180,34 @@ function parseAll() {
   showSections();
 }
 
+function copyTableToClipboard(tableId) {
+  const rows = document.querySelectorAll(`#${tableId} tr`);
+  const text = [...rows].map(row =>
+    [...row.children].map(cell => cell.textContent).join("\t")
+  ).join("\n");
+
+  navigator.clipboard.writeText(text);
+  alert("Copied! Ready to paste into Notion ✨");
+}
+
+function downloadCSV(tableId, filename) {
+  const rows = document.querySelectorAll(`#${tableId} tr`);
+  const csv = [...rows].map(row =>
+    [...row.children]
+      .map(cell => `"${cell.textContent.replace(/"/g, '""')}"`)
+      .join(",")
+  ).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+  
 /* ---------- PLANETS ---------- */
 function parsePlanets() {
   const lines = document.getElementById("planetInput").value.split("\n");
