@@ -80,7 +80,7 @@ th {
 <h4>Other aspects:</h4>
 <textarea id="otherAspectInput"></textarea>
 <br>
-<button type="button" onclick="parseAll()">Parse My Chart</button>
+<button id="parseButton" type="button">Parse My Chart</button>
 
   
 <!-- PLANETARY POSITIONS -->
@@ -338,4 +338,7 @@ function parseAspects() {
     ]);
   });
 }
+  
+document.getElementById("parseButton")
+  .addEventListener("click", parseAll);
 
