@@ -1,157 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Import Birth Chart Data to Notion</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      background-color: #ffffff;
-      padding: 2rem;
-      color: #000000;
-    }
-    textarea {
-      width: 75%;
-      height: 180px;
-      font-family: monospace;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: block;
-    }
-    button {
-      display: block;
-      margin-bottom: 2rem;
-      padding: 0.5rem 1rem;
-      background-color: #c6c2ff;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 2rem;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      text-align: left;
-    }
-    th {
-      background-color: #f0eae2;
-    }
-    .section {
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Astrology Chart → Notion Import Tool</title>
+
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  padding: 2rem;
+  background: #ffffff;
+}
+
+textarea {
+  width: 100%;
+  height: 160px;
+  margin-bottom: 1rem;
+  font-family: monospace;
+  padding: 1rem;
+}
+
+button {
+  padding: 0.75rem 1.25rem;
+  background: #c6c2ff;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+}
+
+th {
+  background: #f0eae2;
+}
+
+.section {
+  display: none;
+  margin-top: 2rem;
+}
+</style>
 </head>
+
 <body>
-  <p><strong>Instructions:</strong><br>
-    1. Go to <a href="https://horoscopes.astro-seek.com/calculate-birth-chart-horoscope-online/" target="_blank">Astro-Seek's Birth Chart Calculator</a><br>
-    2. Scroll to the <strong>AI-ChatGPT - Astrology Data Export</strong> section<br>
-    3. Copy the full text and paste it below.<br>
-    4. Click <strong>Parse My Birth Chart</strong> to see results!</p>
 
-  <textarea id="chartInput" placeholder="Paste your chart data here..."></textarea>
-  <button onclick="parseChart()">Parse My Birth Chart</button>
+<h1>Import Astrology Chart Data</h1>
 
-  <div id="planetSection" class="section">
-    <h2>Planet positions:</h2>
-    <table id="planetTable">
-      <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<p>
+Paste each section from Astro-Seek’s <strong>AI-ChatGPT – Astrology Data Export</strong>
+into the matching box below.
+</p>
 
-  <div id="houseSection" class="section">
-    <h2>House positions:</h2>
-    <table id="houseTable">
-      <thead><tr><th>House</th><th>Sign</th><th>Degree</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<h3>Planet positions:</h3>
+<textarea id="planetInput"></textarea>
 
-  <div id="aspectSection" class="section">
-    <h2>Planet aspects:</h2>
-    <table id="aspectTable">
-      <thead><tr><th>Aspect</th><th>Planet 1</th><th>Type</th><th>Planet 2</th><th>Degree</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<h3>House positions:</h3>
+<textarea id="houseInput"></textarea>
 
-  <script>
-    function parseChart() {
-      const input = document.getElementById('chartInput').value;
-      const lines = input.split('\n').map(line => line.trim()).filter(Boolean);
+<h3>Planet aspects:</h3>
+<textarea id="planetAspectInput"></textarea>
 
-      clearTables();
+<h3>Other aspects:</h3>
+<textarea id="otherAspectInput"></textarea>
 
-      let section = null;
-      for (const line of lines) {
-        const lowerLine = line.toLowerCase();
-        if (lowerLine.includes('planet positions')) section = 'planet';
-        else if (lowerLine.includes('house positions')) section = 'house';
-        else if (lowerLine.includes('planet aspects')) section = 'aspect';
-        else if (section === 'planet') parsePlanetOrObject(line);
-        else if (section === 'house') parseHouse(line);
-        else if (section === 'aspect') parseAspect(line);
-      }
+<button onclick="parseAll()">Parse My Chart</button>
 
-      showSections();
-    }
+<!-- PLANETARY POSITIONS -->
+<div id="planetSection" class="section">
+<h2>Planetary Positions</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Sign</th>
+<th>Motion</th>
+<th>Degree</th>
+<th>House</th>
+</tr>
+</thead>
+<tbody id="planetTable"></tbody>
+</table>
+</div>
 
-    function clearTables() {
-      ['planetTable', 'objectTable', 'houseTable', 'aspectTable'].forEach(id =>
-        document.getElementById(id).querySelector('tbody').innerHTML = ''
-      );
-    }
+<!-- HOUSE POSITIONS -->
+<div id="houseSection" class="section">
+<h2>House Positions</h2>
+<table>
+<thead>
+<tr>
+<th>House</th>
+<th>Sign</th>
+<th>Degree</th>
+</tr>
+</thead>
+<tbody id="houseTable"></tbody>
+</table>
+</div>
 
-    function showSections() {
-      ['planetSection', 'objectSection', 'houseSection', 'aspectSection'].forEach(id =>
-        document.getElementById(id).style.display = 'block'
-      );
-    }
+<!-- ASPECTS -->
+<div id="aspectSection" class="section">
+<h2>Aspects</h2>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Planet 1</th>
+<th>Type</th>
+<th>Planet 2</th>
+<th>Orb</th>
+<th>A vs S</th>
+</tr>
+</thead>
+<tbody id="aspectTable"></tbody>
+</table>
+</div>
 
-    const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-    const objects = ['North Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
+<script>
+const HOUSE_NAMES = {
+  1: "1 • House of Self",
+  2: "2 • House of Value",
+  3: "3 • House of Communication",
+  4: "4 • House of Family",
+  5: "5 • House of Pleasure",
+  6: "6 • House of Health",
+  7: "7 • House of Relationships",
+  8: "8 • House of Transformation",
+  9: "9 • House of Purpose",
+  10: "10 • House of Ambition",
+  11: "11 • House of Friendship",
+  12: "12 • House of Secrets"
+};
 
-    function parsePlanetOrObject(line) {
-      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(?:, (Retrograde))?, in (\d+)[a-z]{2} House/;
-      const match = line.match(regex);
-      if (!match) return;
-      const [ , name, sign, degree, retro, house ] = match;
-      const motion = retro === 'Retrograde' ? 'retro' : 'direct';
-      const row = [name, sign, degree, house, motion];
-      if (planets.includes(name)) appendRow('planetTable', row);
-      else appendRow('objectTable', row);
-    }
+const PLANET_ORDER = [
+  "Sun","Moon","Ascendant","Mercury","Venus","Mars","Jupiter","Saturn",
+  "Uranus","Neptune","Pluto","North Node","South Node","Lilith","Chiron",
+  "Fortune","Vertex","Midheaven","Ceres","Pallas","Juno","Vesta"
+];
 
-    function parseHouse(line) {
-      const match = line.match(/^(\d+)(?:st|nd|rd|th) House in (\w+) (\d+°\d+)/);
-      if (match) appendRow('houseTable', [match[1], match[2], match[3]]);
-    }
+function parseAll() {
+  clearTables();
+  parsePlanets();
+  parseHouses();
+  parseAspects();
+  showSections();
+}
 
-    function parseAspect(line) {
-      const match = line.match(/^(.*?) \(orb: (\d+°\d+′), (Applying|Separating)\)/);
-      if (!match) return;
-      const [ , fullAspect, orb, direction ] = match;
-      const [planet1, type, ...rest] = fullAspect.split(' ');
-      const planet2 = rest.join(' ');
-      appendRow('aspectTable', [fullAspect, planet1, type, planet2, `${orb}, ${direction}`]);
-    }
+/* ---------- PLANETS ---------- */
+function parsePlanets() {
+  const lines = document.getElementById("planetInput").value.split("\n");
+  const rows = {};
 
-    function appendRow(tableId, values) {
-      const tbody = document.getElementById(tableId).querySelector('tbody');
-      const row = document.createElement('tr');
-      values.forEach(val => {
-        const td = document.createElement('td');
-        td.textContent = val;
-        row.appendChild(td);
-      });
-      tbody.appendChild(row);
-    }
-  </script>
-</body>
-</html>
+  lines.forEach(line => {
+    const match = line.match(
+      /^(.*?) in (\w+) (\d+°\d+’)(?:, Retrograde)?, in (\d+)[a-z]{2} House/
+    );
+    if (!match) return;
+
+    let name = match[1]
+      .replace("ASC","Ascendant")
+      .replace("MC","Midheaven");
+
+    const sign = match[2];
+    const degree = match[3];
+    const houseNum = match[4];
+    const motion = line.includes("Retrograde") ? "retro" : "direct";
+
+    rows[name] = [
+      name,
+      sign,
+      motion,
+      degree,
+      HOUSE_NAMES[houseNum]
+    ];
+  });
+
+  PLANET_ORDER.forEach(p => {
+    if (rows[p]) appendRow("planetTable", rows[p]);
+  });
+}
+
+/* ---------- HOUSES ---------- */
+function parseHouses() {
+  const lines = document.getElementById("houseInput").value.split("\n");
+  lines.forEach(line => {
+    const match = line.match(/^(\d+)[a-z]{2} House in (\w+) (\d+°\d+)/);
+    if (!match) return;
+
+    appendRow("houseTable", [
+      HOUSE_NAMES[match[1]],
+      match[2],
+      match[3]
+    ]);
+  });
+}
+
+/* ---------- ASPECTS ---------- */
+function parseAspects() {
+  const combined =
+    document.getElementById("planetAspectInput").value +
+    "\n" +
+    document.getElementById("otherAspectInput").value;
+
+  combined.split("\n").forEach(line => {
+    cons
