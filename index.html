@@ -11,10 +11,20 @@
 <title>Chartkeeper Import Tool</title>
 
 <style>
+/* Default (light mode) styles first */
 body {
-  background-color: #fffbec;
   font-family: "Jost", system-ui, sans-serif;
   font-weight: 400;
+  background-color: #fff;
+  color: #333;
+}
+
+/* Dark mode styles that override the defaults */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #222;
+    color: #fff;
+  }
 }
 
 h1, h4, h3, th {
