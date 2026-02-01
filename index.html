@@ -7,14 +7,15 @@
 
 <style>
 body {
+  width: 75%;
   font-family: system-ui, sans-serif;
   padding: 2rem;
   background: #ffffff;
 }
 
 textarea {
-  width: 100%;
-  height: 160px;
+  width: 50%;
+  height: 100px;
   margin-bottom: 1rem;
   font-family: monospace;
   padding: 1rem;
@@ -107,14 +108,12 @@ into the matching box below.
 
 
 <!-- HOUSE POSITIONS -->
-<button onclick="copyTableToClipboard('houseTable')">Copy for Notion</button>
+<div id="houseSection" class="section">
+<h2>House Positions</h2>
+  <button onclick="copyTableToClipboard('houseTable')">Copy for Notion</button>
 <button onclick="downloadCSV('houseTable','house-positions.csv')">
   Download CSV
 </button>
-
-
-<div id="houseSection" class="section">
-<h2>House Positions</h2>
 <table>
 <thead>
 <tr>
@@ -128,13 +127,12 @@ into the matching box below.
 </div>
 
 <!-- ASPECTS -->
-<button onclick="copyTableToClipboard('aspectTable')">Copy for Notion</button>
+<div id="aspectSection" class="section">
+<h2>Aspects</h2>
+  <button onclick="copyTableToClipboard('aspectTable')">Copy for Notion</button>
 <button onclick="downloadCSV('aspectTable','aspects.csv')">
   Download CSV
 </button>
-
-<div id="aspectSection" class="section">
-<h2>Aspects</h2>
 <table>
 <thead>
 <tr>
