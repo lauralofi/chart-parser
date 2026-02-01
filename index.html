@@ -58,23 +58,15 @@
   <button onclick="parseChart()">Parse My Birth Chart</button>
 
   <div id="planetSection" class="section">
-    <h2>🌞 Planetary Positions</h2>
+    <h2>Planet positions:</h2>
     <table id="planetTable">
       <thead><tr><th>Planet</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 
-  <div id="objectSection" class="section">
-    <h2>🌙 Chart Objects</h2>
-    <table id="objectTable">
-      <thead><tr><th>Object</th><th>Sign</th><th>Degree</th><th>House</th><th>Motion</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
   <div id="houseSection" class="section">
-    <h2>🏠 House Positions</h2>
+    <h2>House positions:</h2>
     <table id="houseTable">
       <thead><tr><th>House</th><th>Sign</th><th>Degree</th></tr></thead>
       <tbody></tbody>
@@ -82,7 +74,7 @@
   </div>
 
   <div id="aspectSection" class="section">
-    <h2>✨ Aspects</h2>
+    <h2>Planet aspects:</h2>
     <table id="aspectTable">
       <thead><tr><th>Aspect</th><th>Planet 1</th><th>Type</th><th>Planet 2</th><th>Degree</th></tr></thead>
       <tbody></tbody>
@@ -123,10 +115,10 @@
     }
 
     const planets = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'];
-    const objects = ['North Node', 'South Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
+    const objects = ['North Node', 'Lilith', 'Chiron', 'Fortune', 'Vertex'];
 
     function parsePlanetOrObject(line) {
-      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|South Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(?:, (Retrograde))?, in (\d+)[a-z]{2} House/;
+      const regex = /^(Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|North Node|Lilith|Chiron|Fortune|Vertex) in (\w+) (\d+°\d+′)(?:, (Retrograde))?, in (\d+)[a-z]{2} House/;
       const match = line.match(regex);
       if (!match) return;
       const [ , name, sign, degree, retro, house ] = match;
